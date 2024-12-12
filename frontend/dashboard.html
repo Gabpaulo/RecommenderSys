@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <header>
+      <h1>Welcome, <span id="user-name">User</span></h1>
+      <button id="logout-button">Log Out</button>
+    </header>
+
+    <!-- Saved Favorites Section -->
+    <section id="favorites-section">
+      <h2>Your Favorite Champions</h2>
+      <div id="favorites-list">
+        <!-- Dynamically load saved favorite champions here -->
+      </div>
+    </section>
+
+    <!-- Add New Favorites Section -->
+    <section id="add-favorites-section">
+      <button id="add-favorites-button">Add New Favorite Champions</button>
+      <div id="champions-section" class="hidden">
+        <h2>Available Champions</h2>
+        <div id="champions-list">
+          <!-- Dynamically load champions for selection here -->
+        </div>
+        <button id="save-preferences">Save Preferences</button>
+      </div>
+    </section>
+
+    <!-- Recommendations Section -->
+    <section id="recommendations-section">
+      <h2>Your Recommendations</h2>
+      <div id="recommendations-list">
+        <!-- Dynamically load recommendations here -->
+      </div>
+    </section>
+  </div>
+
+  <script src="scripts/dashboard.js"></script>
+</body>
+</html>
