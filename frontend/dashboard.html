@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="assets/dashboard.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LoL Dashboard</title>
+  <!-- Link to your cosmic/LoL-inspired CSS -->
+  <link rel="stylesheet" href="assets/dashboard.css" />
 </head>
 <body>
   <div class="dashboard-container">
@@ -13,7 +14,7 @@
       <button id="logout-button">Log Out</button>
     </header>
 
-    <!-- Saved Favorites Section -->
+    <!-- Favorites Section -->
     <section id="favorites-section">
       <h2>Your Favorite Champions</h2>
       <div id="favorites-list">
@@ -27,7 +28,7 @@
       <div id="champions-section" class="hidden">
         <h2>Available Champions</h2>
         <div id="champions-list">
-          <!-- Dynamically load champions for selection here -->
+          <!-- Dynamically load champions for selection here (cards in a 5-column grid) -->
         </div>
         <button id="save-preferences">Save Preferences</button>
       </div>
@@ -37,11 +38,12 @@
     <section id="recommendations-section">
       <h2>Your Recommendations</h2>
       <div id="recommendations-list">
-        <!-- Dynamically load recommendations here -->
+        <!-- Dynamically load recommendations here (collaborative & content-based) -->
       </div>
     </section>
   </div>
 
+  <!-- Main Dashboard JS -->
   <script src="scripts/dashboard.js"></script>
 </body>
 </html>

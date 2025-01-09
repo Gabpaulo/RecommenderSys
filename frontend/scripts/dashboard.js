@@ -15,14 +15,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   const savePreferencesButton = document.getElementById("save-preferences");
   const logoutButton = document.getElementById("logout-button");
 
-  // Fetch user information
+ 
+  // get user info
+
   const fetchUserInfo = async () => {
     try {
       const response = await fetch(`/api/users/${userId}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch user info. Status: ${response.status}`);
       }
-
       const user = await response.json();
       userNameElement.textContent = user.username || "User";
     } catch (error) {
@@ -30,7 +31,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // Fetch saved favorite champions
+  
+  //get Favorites
+
   const fetchFavorites = async () => {
     try {
       const response = await fetch(`/api/users/${userId}/favorites`);
@@ -39,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       const favorites = await response.json();
-      favoritesList.innerHTML = ""; // Clear existing favorites
+      favoritesList.innerHTML = ""; 
 
       if (favorites.length === 0) {
         favoritesList.innerHTML = "<p>No favorite champions added yet.</p>";
@@ -57,7 +60,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   };
 
-  // Fetch all champions (for adding new favorites)
+ 
+  // 3) Fetch Champions (5 per row, card style)
+
   const fetchChampions = async () => {
     try {
       const response = await fetch("/api/champions");
@@ -65,27 +70,53 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error(`Failed to fetch champions. Status: ${response.status}`);
       }
 
-      const champions = await response.json();
-      championsList.innerHTML = ""; // Clear existing champions
+      let champions = await response.json();
+
+      champions = champions.slice(0, 150);
+
+      championsList.innerHTML = "";
+      const championsContainer = document.createElement("div");
+      championsContainer.classList.add("champions-cards-container");
 
       champions.forEach((champion) => {
-        const championDiv = document.createElement("div");
-        championDiv.classList.add("champion-item");
-        championDiv.innerHTML = `
-          <input type="checkbox" id="champion-${champion.Id}" value="${champion.Id}" />
-          <label for="champion-${champion.Id}">${champion.Name} (${champion.Class})</label>
+       
+        champion.ImageURL=`../assets/${champion.Name}.jpg`
+        const placeholderImg =`../assets/${champion.Name}.jpg`;
+
+        const card = document.createElement("div");
+        card.classList.add("champion-card");
+
+        card.innerHTML = `
+          <label>
+            <input
+              type="checkbox"
+              value="${champion.Id}"
+            />
+            <img src="${placeholderImg}" alt="${champion.Name} Image" />
+            <div class="card-info">
+              <p class="champion-name">${champion.Name}</p>
+              <p class="champion-class">${champion.Class}</p>
+            </div>
+            <div class="checked-indicator"></div>
+          </label>
         `;
-        championsList.appendChild(championDiv);
+
+        championsContainer.appendChild(card);
       });
+
+      championsList.appendChild(championsContainer);
     } catch (error) {
       console.error("Error fetching champions:", error);
     }
   };
 
-  // Save user preferences
+
+  // 4) Save Preferences (checked champions)
+
   const savePreferences = async () => {
+    
     const selectedChampions = Array.from(
-      document.querySelectorAll("#champions-list input:checked")
+      document.querySelectorAll(".champion-card input[type='checkbox']:checked")
     ).map((checkbox) => parseInt(checkbox.value));
 
     try {
@@ -102,88 +133,136 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       alert("Preferences saved successfully!");
-      fetchFavorites(); // Refresh favorites
+      fetchFavorites(); 
+      location.reload(); 
     } catch (error) {
       console.error("Error saving preferences:", error);
       alert("An error occurred while saving preferences. Please try again.");
     }
-
-    location.reload()
   };
 
-  // Fetch recommendations
+
+  // 5) Fetch Recommendations 
+
   const fetchRecommendations = async () => {
     try {
       const response = await fetch(`/api/recommendations/${userId}`);
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error fetching recommendations:", errorData.message);
-        throw new Error(`Failed to fetch recommendations. Server responded with: ${errorData.message}`);
+        throw new Error(
+          `Failed to fetch recommendations. Server responded with: ${errorData.message}`
+        );
       }
-  
+
       const { collaborative, contentBased } = await response.json();
-  
-      // Ensure the response contains arrays
+
+   
       if (!Array.isArray(collaborative) || !Array.isArray(contentBased)) {
         console.error("Invalid response structure:", { collaborative, contentBased });
         recommendationsList.innerHTML = "<p>Unexpected response. Please try again later.</p>";
         return;
       }
-  
-      recommendationsList.innerHTML = ""; // Clear existing recommendations
-  
-      // Collaborative Recommendations Section
-      const collaborativeSection = document.createElement("div");
-      collaborativeSection.innerHTML = "<h3>Collaborative Recommendations</h3>";
+
+      recommendationsList.innerHTML = "";
+
+   
+      const collabTitle = document.createElement("h3");
+      collabTitle.classList.add("recommendation-subtitle");
+      collabTitle.textContent = "Collaborative Recommendations";
+
+      const collabContainer = document.createElement("div");
+      collabContainer.classList.add("recommendation-cards-container");
+
       if (collaborative.length === 0) {
-        collaborativeSection.innerHTML += "<p>No collaborative recommendations available.</p>";
+        const noCollabMsg = document.createElement("p");
+        noCollabMsg.textContent = "No collaborative recommendations available.";
+        recommendationsList.appendChild(collabTitle);
+        recommendationsList.appendChild(noCollabMsg);
       } else {
         collaborative.forEach((champion) => {
-          const championDiv = document.createElement("div");
-          championDiv.classList.add("recommendation-item");
-          championDiv.textContent = `${champion.Name} (${champion.Class})`;
-          collaborativeSection.appendChild(championDiv);
+          const card = document.createElement("div");
+          card.classList.add("recommendation-card");
+
+          const champImageURL = `../assets/${champion.Name}.jpg`;
+
+          card.innerHTML = `
+            <img src="${champImageURL}" alt="${champion.Name} Image" />
+            <div class="card-info">
+              <p class="champion-name">${champion.Name}</p>
+              <p class="champion-class">${champion.Class || ""}</p>
+            </div>
+          `;
+          collabContainer.appendChild(card);
         });
+
+        recommendationsList.appendChild(collabTitle);
+        recommendationsList.appendChild(collabContainer);
       }
-  
-      // Content-Based Recommendations Section
-      const contentBasedSection = document.createElement("div");
-      contentBasedSection.innerHTML = "<h3>Content-Based Recommendations</h3>";
+
+      // ----- Content-Based Section -----
+      const cbTitle = document.createElement("h3");
+      cbTitle.classList.add("recommendation-subtitle");
+      cbTitle.textContent = "Content-Based Recommendations";
+
+      const cbContainer = document.createElement("div");
+      cbContainer.classList.add("recommendation-cards-container");
+
       if (contentBased.length === 0) {
-        contentBasedSection.innerHTML += "<p>No content-based recommendations available.</p>";
+        const noCbMsg = document.createElement("p");
+        noCbMsg.textContent = "No content-based recommendations available.";
+        recommendationsList.appendChild(cbTitle);
+        recommendationsList.appendChild(noCbMsg);
       } else {
         contentBased.forEach((champion) => {
-          const championDiv = document.createElement("div");
-          championDiv.classList.add("recommendation-item");
-          championDiv.textContent = `${champion.Name} (${champion.Class})`;
-          contentBasedSection.appendChild(championDiv);
+          const card = document.createElement("div");
+          card.classList.add("recommendation-card");
+
+          const champImageURL = `../assets/${champion.Name}.jpg`;
+
+          card.innerHTML = `
+            <img src="${champImageURL}" alt="${champion.Name} Image" />
+            <div class="card-info">
+              <p class="champion-name">${champion.Name}</p>
+              <p class="champion-class">${champion.Class || ""}</p>
+            </div>
+          `;
+          cbContainer.appendChild(card);
         });
+
+        recommendationsList.appendChild(cbTitle);
+        recommendationsList.appendChild(cbContainer);
       }
-  
-      // Append both sections to the recommendations list
-      recommendationsList.appendChild(collaborativeSection);
-      recommendationsList.appendChild(contentBasedSection);
     } catch (error) {
       console.error("Error fetching recommendations:", error);
       alert("Unable to fetch recommendations. Please try again later.");
     }
   };
-  
 
-  // Toggle "Add New Favorites" section
-  addFavoritesButton.addEventListener("click", () => {
+  
+  // 6) Toggle Add Favorites
+
+  addFavoritesButton.addEventListener("click", async () => {
     const championsSection = document.getElementById("champions-section");
     championsSection.classList.toggle("hidden");
-    fetchChampions(); // Fetch champions only when the section is shown
+
+
+    if (!championsSection.classList.contains("hidden")) {
+      await fetchChampions();
+    }
   });
 
-  // Logout user
+
+  // 7) Logout
+
   const logoutUser = () => {
     localStorage.removeItem("userId");
     window.location.href = "/login.html";
   };
 
-  // Initialize Dashboard
+
+// Initialize Dashboard
+
   try {
     await fetchUserInfo();
     await fetchFavorites();
@@ -192,7 +271,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error initializing dashboard:", error);
   }
 
-  // Event listeners
+
+
+ 
   savePreferencesButton.addEventListener("click", savePreferences);
   logoutButton.addEventListener("click", logoutUser);
 });
